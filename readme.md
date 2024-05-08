@@ -1,5 +1,7 @@
 # Subtitle Generator (SRT), using local Whisper
 
+Creates synced SRT and plaintext output files containing a transcript of the input video.
+
 ## Usage
 
 ```
