@@ -33,8 +33,8 @@ def convert(seconds):
   hour = seconds // 3600
   minutes = seconds // 60
   seconds %= 60
-  milliseconds = int(seconds*1000%1000)
-  return "%d:%02d:%02d,%d" % (hour, minutes, seconds, milliseconds)
+  milliseconds = str(int(seconds*1000%1000))[:3] # Prevent the ocassional super long output
+  return "%d:%02d:%02d,%s" % (hour, minutes, seconds, milliseconds)
 
 
 ## Delete existing files if wanted
