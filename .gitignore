@@ -1,6 +1,7 @@
 *
 !.gitignore
 !main.py
+!srt.py
 !readme.md
 !requirements.txt
 !subtinator-logo-circle.svg

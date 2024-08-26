@@ -3,6 +3,7 @@ from faster_whisper import WhisperModel
 import os
 import sys
 import argparse
+import srt
 
 parser = argparse.ArgumentParser()
 parser.add_argument("input_video_path", type=str)
@@ -24,18 +25,6 @@ if not os.path.exists(args.stt_path):
 print(f"SRT / Transcript output directory set to: {args.output_dir}")
 print(f"STT Model size set to: {args.stt_model}")
 print(f"STT model path set to: {args.stt_path}")
-
-## Credit for this function: https://medium.com/@easylearn.ai/generating-highly-accurate-srt-subtitles-with-ai-openai-whisper-17d25ee3a1a2
-## Converts nnumber of seconds to SRT timestamp
-def convert(seconds):
-  seconds = seconds % (24 * 3600)
-  seconds %= 3600
-  hour = seconds // 3600
-  minutes = seconds // 60
-  seconds %= 60
-  milliseconds = str(int(seconds*1000%1000))[:3] # Prevent the ocassional super long output
-  return "%d:%02d:%02d,%s" % (hour, minutes, seconds, milliseconds)
-
 
 ## Delete existing files if wanted
 if os.path.exists(srt_path):
@@ -67,8 +56,7 @@ sub_id = 0
 for segment in segments:
   sub_id += 1
   print(f"{segment.start}s -> {segment.end}s: {segment.text}")
-  ## This from https://github.com/Arhosseini77/subtitle_whisper/blob/main/module.py
-  srt_output += f"{sub_id}\n{convert(segment.start)} --> {convert(segment.end)}\n{segment.text}\n\n"
+  srt_output += srt.subtitle_from_transcription(sub_id, segment.start, segment.end, segment.text)
   plain_output += f"{segment.text}\n"
 
 srt_text = srt_output.strip()
