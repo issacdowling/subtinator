@@ -1,6 +1,5 @@
 ## Credit for this function: https://medium.com/@easylearn.ai/generating-highly-accurate-srt-subtitles-with-ai-openai-whisper-17d25ee3a1a2
 ## Converts number of seconds to SRT timestamp
-
 def seconds_to_timestamp(seconds: float):
   seconds = seconds % (24 * 3600)
   seconds %= 3600
