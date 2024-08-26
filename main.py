@@ -45,25 +45,23 @@ except: #huggingface_hub.utils._errors.LocalEntryNotFoundError (but can't do tha
   model = WhisperModel(model_size_or_path=args.stt_model, device="cpu", download_root=args.stt_path, cpu_threads=6)
 
 ## Doesn't transcribe the video directly, segments is a generator
-segments, info = model.transcribe(args.input_video_path, language='en')
+segments, info = model.transcribe(args.input_video_path, language="en")
 
 srt_output = ""
 plain_output = ""
 
-sub_id = 0
-for segment in segments:
-  sub_id += 1
+for line_index, segment in enumerate(segments):
   print(f"{segment.start}s -> {segment.end}s: {segment.text}")
-  srt_output += srt.subtitle_from_transcription(sub_id, segment.start, segment.end, segment.text)
+  srt_output += srt.subtitle_from_transcription(line_index + 1, segment.start, segment.end, segment.text)
   plain_output += f"{segment.text}\n"
 
 srt_text = srt_output.strip()
 
 ## Save a synced SRT and unsynced TXT
-with open(srt_path, 'w') as file:
+with open(srt_path, "w") as file:
   file.write(srt_text)
 print(f"SRT has been saved to {srt_path}")
 
-with open(transcript_path, 'w') as file:
+with open(transcript_path, "w") as file:
   file.write(plain_output)
 print(f"Plaintext has been saved to {transcript_path}")
