@@ -10,7 +10,7 @@ parser.add_argument("input_video_path", type=str)
 parser.add_argument("--output_dir", type=str, required=False, default=sys.path[0])
 parser.add_argument("--stt_model", type=str, required=False, default="medium.en")
 parser.add_argument("--stt_path", type=str, required=False, default=f"{sys.path[0]}/stt")
-parser.add_argument("--force", type=bool, required=False, default=False, action=argparse.BooleanOptionalAction)
+parser.add_argument("-y", type=bool, required=False, default=False, action=argparse.BooleanOptionalAction)
 args = parser.parse_args()
 
 srt_path = f"{args.output_dir}/subtitles.srt"
@@ -26,7 +26,7 @@ print(f"SRT / Transcript output directory set to: {args.output_dir}")
 print(f"STT Model size set to: {args.stt_model}")
 print(f"STT model path set to: {args.stt_path}")
 
-if args.force == False:
+if args.y == False:
     if os.path.exists(srt_path):
         if input("Existing SRT file found, delete? [Y/n]") == "n":
             exit()
@@ -38,7 +38,7 @@ if args.force == False:
         else:
             os.remove(transcript_path)
 else:
-    print(f"--force supplied, removing any existing {srt_path} / {transcript_path}")
+    print(f"-y supplied, removing any existing {srt_path} / {transcript_path}")
 
 ## Do this so that unfound models are automatically downloaded, but by default we aren't checking remotely at all, and the
 ## STT directory doesn't need to be deleted just to automatically download other models
