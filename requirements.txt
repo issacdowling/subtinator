@@ -1,1 +1,1 @@
-faster-whisper
+pywhispercpp==1.2.0

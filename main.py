@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from faster_whisper import WhisperModel
+from pywhispercpp.model import Model, Segment
 import os
 import sys
 import argparse
@@ -10,7 +10,7 @@ import srt
 parser = argparse.ArgumentParser()
 parser.add_argument("input_video_path", type=str)
 parser.add_argument("--output_dir", type=str, required=False, default=sys.path[0])
-parser.add_argument("--stt_model", type=str, required=False, default="medium.en")
+parser.add_argument("--stt_model", type=str, required=False, default="large-v2")
 parser.add_argument("--stt_path", type=str, required=False, default=f"{sys.path[0]}/stt")
 parser.add_argument("-y", type=bool, required=False, default=False, action=argparse.BooleanOptionalAction)
 args = parser.parse_args()
@@ -42,23 +42,17 @@ if args.y == False:
 else:
     print(f"-y supplied, removing any existing {srt_path} / {transcript_path}")
 
-## Do this so that unfound models are automatically downloaded, but by default we aren't checking remotely at all, and the
-## STT directory doesn't need to be deleted just to automatically download other models
-try:
-    model = WhisperModel(model_size_or_path=args.stt_model, device="auto", download_root=args.stt_path, local_files_only=True)
-except:  # huggingface_hub.utils._errors.LocalEntryNotFoundError (but can't do that here since huggingfacehub not directly imported)
-    print(f"Downloading Model: {args.stt_model}")
-    model = WhisperModel(model_size_or_path=args.stt_model, device="auto", download_root=args.stt_path)
+model = Model(model=args.stt_model, models_dir=args.stt_path)
 
-## Doesn't transcribe the video directly, segments is a generator
-segments, info = model.transcribe(args.input_video_path, language="en")
+# Despite this messing with type hints, it works. It claims to need a Segment, but it actually needs a list[Segment]. PR opened upstream to fix.
+segments = model.transcribe(args.input_video_path, new_segment_callback=lambda new_segment: print(f"{new_segment[0].t0/100}s -> {new_segment[0].t1/100}s: {new_segment[0].text}"))  # type: ignore
 
 srt_output = ""
 plain_output = ""
 
+# Times in Segments are in tens of milliseconds
 for line_index, segment in enumerate(segments):
-    print(f"{segment.start}s -> {segment.end}s: {segment.text}")
-    srt_output += srt.subtitle_from_transcription(line_index + 1, segment.start, segment.end, segment.text)
+    srt_output += srt.subtitle_from_transcription(line_index + 1, segment.t0 / 100, segment.t1 / 100, segment.text)
     plain_output += f"{segment.text}\n"
 
 srt_text = srt_output.strip()
