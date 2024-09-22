@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from faster_whisper import WhisperModel
+from pywhispercpp.model import Model
 import os
 import sys
 import argparse
@@ -44,21 +44,18 @@ else:
 
 ## Do this so that unfound models are automatically downloaded, but by default we aren't checking remotely at all, and the
 ## STT directory doesn't need to be deleted just to automatically download other models
-try:
-    model = WhisperModel(model_size_or_path=args.stt_model, device="auto", download_root=args.stt_path, local_files_only=True)
-except:  # huggingface_hub.utils._errors.LocalEntryNotFoundError (but can't do that here since huggingfacehub not directly imported)
-    print(f"Downloading Model: {args.stt_model}")
-    model = WhisperModel(model_size_or_path=args.stt_model, device="auto", download_root=args.stt_path)
+model = Model(model=args.stt_model, models_dir=args.stt_path)
 
 ## Doesn't transcribe the video directly, segments is a generator
-segments, info = model.transcribe(args.input_video_path, language="en")
+segments = model.transcribe(args.input_video_path)
 
 srt_output = ""
 plain_output = ""
 
+# Times in Segments are in tens of milliseconds
 for line_index, segment in enumerate(segments):
-    print(f"{segment.start}s -> {segment.end}s: {segment.text}")
-    srt_output += srt.subtitle_from_transcription(line_index + 1, segment.start, segment.end, segment.text)
+    print(f"{segment.t0/100}s -> {segment.t1/100}s: {segment.text}")
+    srt_output += srt.subtitle_from_transcription(line_index + 1, segment.t0 / 100, segment.t1 / 100, segment.text)
     plain_output += f"{segment.text}\n"
 
 srt_text = srt_output.strip()
