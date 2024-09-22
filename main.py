@@ -5,6 +5,8 @@ import sys
 import argparse
 import srt
 
+# When setting a model, Large V3 is to be avoided for English, as it just seems worse than V2.
+
 parser = argparse.ArgumentParser()
 parser.add_argument("input_video_path", type=str)
 parser.add_argument("--output_dir", type=str, required=False, default=sys.path[0])
@@ -18,8 +20,8 @@ transcript_path = f"{args.output_dir}/transcript.txt"
 
 ## Create Whisper model path if it doesn't exist
 if not os.path.exists(args.stt_path):
-  os.mkdir(args.stt_path)
-  print("Created STT Model directory as it didn't exist")
+    os.mkdir(args.stt_path)
+    print("Created STT Model directory as it didn't exist")
 
 ## Let user know about the variables that are in use
 print(f"SRT / Transcript output directory set to: {args.output_dir}")
@@ -43,10 +45,10 @@ else:
 ## Do this so that unfound models are automatically downloaded, but by default we aren't checking remotely at all, and the
 ## STT directory doesn't need to be deleted just to automatically download other models
 try:
-  model = WhisperModel(model_size_or_path=args.stt_model, device="cpu", download_root=args.stt_path, local_files_only = True, cpu_threads=6)
-except: #huggingface_hub.utils._errors.LocalEntryNotFoundError (but can't do that here since huggingfacehub not directly imported)
-  print(f"Downloading Model: {args.stt_model}")
-  model = WhisperModel(model_size_or_path=args.stt_model, device="cpu", download_root=args.stt_path, cpu_threads=6)
+    model = WhisperModel(model_size_or_path=args.stt_model, device="auto", download_root=args.stt_path, local_files_only=True)
+except:  # huggingface_hub.utils._errors.LocalEntryNotFoundError (but can't do that here since huggingfacehub not directly imported)
+    print(f"Downloading Model: {args.stt_model}")
+    model = WhisperModel(model_size_or_path=args.stt_model, device="auto", download_root=args.stt_path)
 
 ## Doesn't transcribe the video directly, segments is a generator
 segments, info = model.transcribe(args.input_video_path, language="en")
@@ -55,17 +57,17 @@ srt_output = ""
 plain_output = ""
 
 for line_index, segment in enumerate(segments):
-  print(f"{segment.start}s -> {segment.end}s: {segment.text}")
-  srt_output += srt.subtitle_from_transcription(line_index + 1, segment.start, segment.end, segment.text)
-  plain_output += f"{segment.text}\n"
+    print(f"{segment.start}s -> {segment.end}s: {segment.text}")
+    srt_output += srt.subtitle_from_transcription(line_index + 1, segment.start, segment.end, segment.text)
+    plain_output += f"{segment.text}\n"
 
 srt_text = srt_output.strip()
 
 ## Save a synced SRT and unsynced TXT
 with open(srt_path, "w") as file:
-  file.write(srt_text)
+    file.write(srt_text)
 print(f"SRT has been saved to {srt_path}")
 
 with open(transcript_path, "w") as file:
-  file.write(plain_output)
+    file.write(plain_output)
 print(f"Plaintext has been saved to {transcript_path}")
