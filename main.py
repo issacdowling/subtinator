@@ -10,7 +10,7 @@ import srt
 parser = argparse.ArgumentParser()
 parser.add_argument("input_video_path", type=str)
 parser.add_argument("--output_dir", type=str, required=False, default=sys.path[0])
-parser.add_argument("--stt_model", type=str, required=False, default="medium.en")
+parser.add_argument("--stt_model", type=str, required=False, default="large-v2")
 parser.add_argument("--stt_path", type=str, required=False, default=f"{sys.path[0]}/stt")
 parser.add_argument("-y", type=bool, required=False, default=False, action=argparse.BooleanOptionalAction)
 args = parser.parse_args()
@@ -42,10 +42,7 @@ if args.y == False:
 else:
     print(f"-y supplied, removing any existing {srt_path} / {transcript_path}")
 
-## Do this so that unfound models are automatically downloaded, but by default we aren't checking remotely at all, and the
-## STT directory doesn't need to be deleted just to automatically download other models
 model = Model(model=args.stt_model, models_dir=args.stt_path)
-
 
 # Despite this messing with type hints, it works. It claims to need a Segment, but it actually needs a list[Segment]. PR opened upstream to fix.
 segments = model.transcribe(args.input_video_path, new_segment_callback=lambda new_segment: print(f"{new_segment[0].t0/100}s -> {new_segment[0].t1/100}s: {new_segment[0].text}"))  # type: ignore
