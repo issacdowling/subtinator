@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from pywhispercpp.model import Model
+from pywhispercpp.model import Model, Segment
 import os
 import sys
 import argparse
@@ -46,15 +46,15 @@ else:
 ## STT directory doesn't need to be deleted just to automatically download other models
 model = Model(model=args.stt_model, models_dir=args.stt_path)
 
-## Doesn't transcribe the video directly, segments is a generator
-segments = model.transcribe(args.input_video_path)
+
+# Despite this messing with type hints, it works. It claims to need a Segment, but it actually needs a list[Segment]. PR opened upstream to fix.
+segments = model.transcribe(args.input_video_path, new_segment_callback=lambda new_segment: print(f"{new_segment[0].t0/100}s -> {new_segment[0].t1/100}s: {new_segment[0].text}"))  # type: ignore
 
 srt_output = ""
 plain_output = ""
 
 # Times in Segments are in tens of milliseconds
 for line_index, segment in enumerate(segments):
-    print(f"{segment.t0/100}s -> {segment.t1/100}s: {segment.text}")
     srt_output += srt.subtitle_from_transcription(line_index + 1, segment.t0 / 100, segment.t1 / 100, segment.text)
     plain_output += f"{segment.text}\n"
 
