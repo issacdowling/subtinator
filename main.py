@@ -10,8 +10,8 @@ import srt
 parser = argparse.ArgumentParser()
 parser.add_argument("input_video_path", type=str)
 parser.add_argument("--output_dir", type=str, required=False, default=sys.path[0])
-parser.add_argument("--stt_model", type=str, required=False, default="large-v2")
-parser.add_argument("--stt_path", type=str, required=False, default=f"{sys.path[0]}/stt")
+parser.add_argument("--model", type=str, required=False, default="large-v2")
+parser.add_argument("--model_path", type=str, required=False, default=f"{sys.path[0]}/stt")
 parser.add_argument("-y", type=bool, required=False, default=False, action=argparse.BooleanOptionalAction)
 args = parser.parse_args()
 
@@ -19,14 +19,14 @@ srt_path = f"{args.output_dir}/subtitles.srt"
 transcript_path = f"{args.output_dir}/transcript.txt"
 
 ## Create Whisper model path if it doesn't exist
-if not os.path.exists(args.stt_path):
-    os.mkdir(args.stt_path)
+if not os.path.exists(args.model_path):
+    os.mkdir(args.model_path)
     print("Created STT Model directory as it didn't exist")
 
 ## Let user know about the variables that are in use
 print(f"SRT / Transcript output directory set to: {args.output_dir}")
-print(f"STT Model size set to: {args.stt_model}")
-print(f"STT model path set to: {args.stt_path}")
+print(f"STT Model size set to: {args.model}")
+print(f"STT model path set to: {args.model_path}")
 
 if args.y == False:
     if os.path.exists(srt_path):
@@ -42,7 +42,7 @@ if args.y == False:
 else:
     print(f"-y supplied, removing any existing {srt_path} / {transcript_path}")
 
-model = Model(model=args.stt_model, models_dir=args.stt_path)
+model = Model(model=args.model, models_dir=args.model_path)
 
 # Despite this messing with type hints, it works. It claims to need a Segment, but it actually needs a list[Segment]. PR opened upstream to fix.
 segments = model.transcribe(args.input_video_path, new_segment_callback=lambda new_segment: print(f"{new_segment[0].t0/100}s -> {new_segment[0].t1/100}s: {new_segment[0].text}"))  # type: ignore

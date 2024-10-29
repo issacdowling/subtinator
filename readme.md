@@ -25,6 +25,7 @@ If you want GPU support, remove the `pywhispercpp` that you just downloaded, and
 ```
 git clone --recursive https://github.com/abdeladim-s/pywhispercpp
 cd pywhispercpp
+git checkout v1.2.0
 GGML_VULKAN=1 pip install .
 cd ..
 ```
