@@ -20,13 +20,13 @@ python -m venv .venv
 ```
 
 #### GPU support
-If you want GPU support, remove the `pywhispercpp` that you just downloaded, and build it with Vulkan enabled.
+If you want GPU support, remove the `pywhispercpp` that you just downloaded, and build it with Vulkan enabled. Make sure you've got `cmake` and `vulkan-headers` (or your distro's equivalents) installed.
 
 ```
 git clone --recursive https://github.com/abdeladim-s/pywhispercpp
 cd pywhispercpp
-git checkout v1.2.0
-GGML_VULKAN=1 pip install .
+git checkout v1.3.0
+GGML_VULKAN=1 pip install . # Can be GGML_CUDA if you REALLY want, but Vulkan is cross-platform so why not?
 cd ..
 ```
 

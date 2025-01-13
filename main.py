@@ -44,8 +44,7 @@ else:
 
 model = Model(model=args.model, models_dir=args.model_path)
 
-# Despite this messing with type hints, it works. It claims to need a Segment, but it actually needs a list[Segment]. PR opened upstream to fix.
-segments = model.transcribe(args.input_video_path, new_segment_callback=lambda new_segment: print(f"{new_segment[0].t0/100}s -> {new_segment[0].t1/100}s: {new_segment[0].text}"))  # type: ignore
+segments = model.transcribe(args.input_video_path, new_segment_callback=lambda new_segment: print(f"{new_segment.t0/100}s -> {new_segment.t1/100}s: {new_segment.text}"))  # type: ignore
 
 srt_output = ""
 plain_output = ""
